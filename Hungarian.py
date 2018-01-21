@@ -10,25 +10,17 @@ def get_optim_assignment(matrix):
         transposed = False
 
     hungarian = Hungarian(matrix)
-    hungarian.calculate()
+    assignments = hungarian.calculate()
 
     if transposed:
-        assignments = hungarian.assignments.T
-    else:
-        assignments = hungarian.assignments
-
-    # total_cost = 0
-    # assigns = np.where(assignments==1)
-    #
-    # for i in range(assigns[0].shape[0]):
-    #     total_cost += matrix[i][assigns[1][i]]
-    # print(total_cost)
+        assignments = assignments.T
 
     return np.where(assignments == 1)
 
 class Hungarian(object):
     def __init__(self, matrix):
-        self.cost_matrix = matrix.copy()
+        self.ori_matrix = matrix.copy()
+        self.cost_matrix = np.pad(matrix, [(0, matrix.shape[1] - matrix.shape[0]), (0, 0)], mode='constant')
         n,m = self.cost_matrix.shape
         self.assignments = np.zeros((n,m),dtype=int)
         self.row_marked = np.zeros(n, dtype=bool)
@@ -38,6 +30,16 @@ class Hungarian(object):
 
     def calculate(self):
         self.step_1()
+        assignments = self.assignments[0:self.ori_matrix.shape[0],:]
+        return assignments
+
+    def get_total_cost(self):
+        total_cost = 0
+        assigns = np.where(self.assignments == 1)
+
+        for i in range(assigns[0].shape[0]):
+            total_cost += self.ori_matrix[i][assigns[1][i]]
+        return total_cost
 
     def clear_cover(self):
         self.row_marked[:] = False
@@ -122,5 +124,20 @@ class Hungarian(object):
                 self.col_marked[col] = False
 
 # cost_matrix = np.asarray([[10, 19, 8, 15, 19],[10, 18, 7, 17, 19],[13, 16, 9, 14, 19],[12, 19, 8, 18, 19],[14, 17, 10, 19, 19]])
-cost_matrix = np.asarray([[236.53012493,234.64121548,224.94554897]])
+# cost_matrix = np.asarray([[236.53012493,234.64121548,224.94554897]])
+cost_matrix = [[225.35860312,222.4707846, 213.39283025],
+ [ 30.08321791,  5.85234996, 10.        ],
+ [ 50.14229751, 25.93260496, 19.47434209],
+ [ 60.01666435, 35.85038354, 26.40075756],
+ [ 32.00390601, 10.12422837,  3.04138127]]
+# cost_matrix = [[  7,  53, 183, 439, 863],
+#              [497, 383, 563,  79, 973],
+#              [287,  63, 343, 169, 583],
+#              [627, 343, 773, 959, 943],
+#              [767, 473, 103, 699, 303]]
+# print(cost_matrix.T)
 print(get_optim_assignment(cost_matrix))
+
+# import hungarian_new
+#
+# hungarian_new.minimize(cost_matrix)
