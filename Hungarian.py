@@ -1,9 +1,23 @@
 import numpy as np
 
 def get_optim_assignment(matrix):
+
+    matrix = np.asarray(matrix)
     hungarian = Hungarian(matrix)
-    hungarian.step_1()
-    return hungarian.assignments
+
+    if matrix.shape[1] < matrix.shape[0]:
+        matrix = matrix.T
+        transposed = True
+    else:
+        transposed = False
+
+    hungarian.calculate()
+
+    if transposed:
+        assignments = hungarian.assignments.T
+    else:
+        assignments = hungarian.assignments
+    return np.where(assignments == 1)
 
 class Hungarian(object):
     def __init__(self, matrix):
@@ -12,6 +26,9 @@ class Hungarian(object):
         self.assignments = np.zeros((n,m),dtype=int)
         self.row_marked = np.zeros(n, dtype=bool)
         self.col_marked = np.zeros(m, dtype=bool)
+
+    def calculate(self):
+        self.step_1()
 
     def clear_cover(self):
         self.row_marked[:] = False
@@ -59,15 +76,6 @@ class Hungarian(object):
 
         self.row_marked = ~self.row_marked
 
-        # while True:
-        #     self.col_marked = new_col_marked
-        #     new_row_marked = np.any(self.assignments[:,self.col_marked]==1, axis=1)
-        #     new_col_marked = np.any(self.cost_matrix[new_row_marked,:]==0, axis=0)
-        #
-        #     self.row_marked = ~np.logical_or(self.row_marked, new_row_marked)
-        #     if np.equal(new_col_marked, self.col_marked):
-        #         break
-
         no_lines = np.count_nonzero(self.col_marked) + np.count_nonzero(self.row_marked)
 
         if no_lines < self.cost_matrix.shape[0]:
@@ -87,5 +95,5 @@ class Hungarian(object):
     def step_5(self):
         pass
 
-cost_matrix = np.asarray([[90, 75, 75, 80],[35, 85, 55, 65],[125, 95, 90, 105],[45, 110, 95, 115]])
+cost_matrix = np.asarray([[90, 75, 75, 80, 30],[35, 85, 55, 65, 60],[125, 80, 95, 90, 105],[45, 20, 110, 95, 115]])
 get_optim_assignment(cost_matrix)
