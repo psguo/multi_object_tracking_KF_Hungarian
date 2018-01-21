@@ -3,14 +3,13 @@ import numpy as np
 def get_optim_assignment(matrix):
 
     matrix = np.asarray(matrix)
-    hungarian = Hungarian(matrix)
-
     if matrix.shape[1] < matrix.shape[0]:
         matrix = matrix.T
         transposed = True
     else:
         transposed = False
 
+    hungarian = Hungarian(matrix)
     hungarian.calculate()
 
     if transposed:
@@ -26,6 +25,8 @@ class Hungarian(object):
         self.assignments = np.zeros((n,m),dtype=int)
         self.row_marked = np.zeros(n, dtype=bool)
         self.col_marked = np.zeros(m, dtype=bool)
+        self.row_no = n
+        self.col_no = m
 
     def calculate(self):
         self.step_1()
@@ -93,7 +94,21 @@ class Hungarian(object):
         self.step_3()
 
     def step_5(self):
-        pass
+        self.reset_assignments()
+        self._step_5(0)
+
+    def _step_5(self, row):
+        if row == self.row_no:
+            return True
+
+        for col in range(self.col_no):
+            if self.cost_matrix[row, col] == 0 and not self.col_marked[col]:
+                self.assignments[row][col] = 1
+                self.col_marked[col] = True
+                if (self._step_5(row+1)):
+                    return True
+                self.assignments[row][col] = 0
+                self.col_marked[col] = False
 
 cost_matrix = np.asarray([[90, 75, 75, 80, 30],[35, 85, 55, 65, 60],[125, 80, 95, 90, 105],[45, 20, 110, 95, 115]])
-get_optim_assignment(cost_matrix)
+print(get_optim_assignment(cost_matrix))
