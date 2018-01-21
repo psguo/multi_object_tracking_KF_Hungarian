@@ -17,12 +17,12 @@ def get_optim_assignment(matrix):
     else:
         assignments = hungarian.assignments
 
-    total_cost = 0
-    assigns = np.where(assignments==1)
-
-    for i in range(assigns[0].shape[0]):
-        total_cost += matrix[i][assigns[1][i]]
-    print(total_cost)
+    # total_cost = 0
+    # assigns = np.where(assignments==1)
+    #
+    # for i in range(assigns[0].shape[0]):
+    #     total_cost += matrix[i][assigns[1][i]]
+    # print(total_cost)
 
     return np.where(assignments == 1)
 
@@ -50,8 +50,11 @@ class Hungarian(object):
 
     def step_1(self):
         self.cost_matrix -= self.cost_matrix.min(axis=1)[:, np.newaxis]
-        # self.assignments[np.where(np.matrix==0)] = 1
-        self.step_2()
+
+        if self.cost_matrix.shape[0] == 1:
+            self.step_3()
+        else:
+            self.step_2()
 
     def step_2(self):
         self.cost_matrix -= self.cost_matrix.min(axis=0)[np.newaxis, :]
@@ -118,5 +121,6 @@ class Hungarian(object):
                 self.assignments[row][col] = 0
                 self.col_marked[col] = False
 
-cost_matrix = np.asarray([[10, 19, 8, 15, 19],[10, 18, 7, 17, 19],[13, 16, 9, 14, 19],[12, 19, 8, 18, 19],[14, 17, 10, 19, 19]])
+# cost_matrix = np.asarray([[10, 19, 8, 15, 19],[10, 18, 7, 17, 19],[13, 16, 9, 14, 19],[12, 19, 8, 18, 19],[14, 17, 10, 19, 19]])
+cost_matrix = np.asarray([[236.53012493,234.64121548,224.94554897]])
 print(get_optim_assignment(cost_matrix))
