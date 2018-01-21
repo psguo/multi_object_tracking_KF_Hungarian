@@ -41,10 +41,6 @@ class Hungarian(object):
             total_cost += self.ori_matrix[i][assigns[1][i]]
         return total_cost
 
-    def clear_cover(self):
-        self.row_marked[:] = False
-        self.col_marked[:] = False
-
     def reset_assignments(self):
         self.row_marked[:] = False
         self.col_marked[:] = False
@@ -96,8 +92,6 @@ class Hungarian(object):
                 crossed[:, j] = 1
 
             prev_count = np.count_nonzero(crossed == 0)
-
-        self.clear_cover()
 
         # 2. Draw as few lines as possible
         new_row_marked = np.all(self.assignments==0,axis=1)
