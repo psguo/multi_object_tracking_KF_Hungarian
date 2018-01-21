@@ -16,6 +16,14 @@ def get_optim_assignment(matrix):
         assignments = hungarian.assignments.T
     else:
         assignments = hungarian.assignments
+
+    total_cost = 0
+    assigns = np.where(assignments==1)
+
+    for i in range(assigns[0].shape[0]):
+        total_cost += matrix[i][assigns[1][i]]
+    print(total_cost)
+
     return np.where(assignments == 1)
 
 class Hungarian(object):
@@ -110,5 +118,5 @@ class Hungarian(object):
                 self.assignments[row][col] = 0
                 self.col_marked[col] = False
 
-cost_matrix = np.asarray([[90, 75, 75, 80, 30],[35, 85, 55, 65, 60],[125, 80, 95, 90, 105],[45, 20, 110, 95, 115]])
+cost_matrix = np.asarray([[10, 19, 8, 15, 19],[10, 18, 7, 17, 19],[13, 16, 9, 14, 19],[12, 19, 8, 18, 19],[14, 17, 10, 19, 19]])
 print(get_optim_assignment(cost_matrix))
