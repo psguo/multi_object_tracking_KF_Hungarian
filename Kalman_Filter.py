@@ -30,19 +30,13 @@ class Kalman_Filter(object):
         self.H = np.eye(self.y.shape[0])
         self.R = np.eye(self.y.shape[0])
 
-        self.prevResult = np.zeros((4, 1))
-
     def predict(self, u=0):
         self.x = np.round(np.dot(self.F, self.x) + self.G * u)
         self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.Q
-        self.prevResult = self.x
         return self.x
 
-    def correct(self, y, isDetected):
-        if not isDetected:
-            self.y = self.prevResult
-        else:
-            self.y = y
+    def correct(self, y):
+        self.y = y
         S = np.dot(self.H, np.dot(self.P, self.H.T)) + self.R
         W = np.dot(self.P, np.dot(self.H.T, np.linalg.inv(S)))
 
@@ -51,5 +45,4 @@ class Kalman_Filter(object):
     def update(self, S, W):
         self.x = np.round(self.x + np.dot(W, (self.y - np.dot(self.H, self.x))))
         self.P = self.P - np.dot(W, np.dot(S, W.T))
-        self.prevResult = self.x
         return self.x
