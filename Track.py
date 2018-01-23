@@ -20,7 +20,8 @@ class TrackingList(object):
         self.dt = dt
 
     def add_new_track(self, track_pos):
-        track = TrackingElem(track_pos, self.trackIdCount, self.dt)
+        pos = np.array([[track_pos[0]], [0.0], [track_pos[1]], [0.0]])
+        track = TrackingElem(pos, self.trackIdCount, self.dt)
         self.trackIdCount += 1
         self.tracks.append(track)
 
@@ -34,11 +35,11 @@ class TrackingList(object):
         cost_matrix = np.zeros((tracks_no, detects_no))
         for i in range(tracks_no):
             for j in range(detects_no):
-                diff = self.tracks[i].pos - detects[j]
-                cost_matrix[i][j] = np.sqrt(diff[0][0] ** 2 + diff[1][0] ** 2)
-
+                diff_x = self.tracks[i].pos[0] - detects[j][0]
+                diff_y = self.tracks[i].pos[2] - detects[j][1]
+                cost_matrix[i][j] = np.sqrt(diff_x ** 2 + diff_y ** 2)
+                # print(cost_matrix[i][j])
         row_inds, col_inds = get_optim_assignment(cost_matrix)
-
         # assign assigned rows
         assigns = [-1 for i in range(tracks_no)]
         for i in range(len(row_inds)):
@@ -63,14 +64,23 @@ class TrackingList(object):
             old_pos = self.tracks[i].KF.x.copy()
             pred_pos = self.tracks[i].KF.predict()
             if assigns[i] != -1:
-                vel_x = (detects[i][0] - old_pos[i][0]) / self.dt
-                vel_y = (detects[i][1] - old_pos[i][1]) / self.dt
-
-                obs = np.asarray([detects[i][0],vel_x,detects[i][1],vel_y])
-                self.tracks[i].pos = self.tracks[i].KF.correct(obs, isFirst = False)
+                detect_id = assigns[i]
+                # print('------------look---------')
+                if len(self.tracks[i].trace) == 0:
+                    vel_x = 0
+                    vel_y = 0
+                else:
+                    # print(detects[detect_id][0])
+                    # print(old_pos[0])
+                    # print(detects[detect_id][1])
+                    # print(old_pos[2])
+                    vel_x = (detects[detect_id][0] - old_pos[0]) / self.dt
+                    vel_y = (detects[detect_id][1] - old_pos[2]) / self.dt
+                obs = np.asarray([[detects[detect_id][0]],[vel_x],[detects[detect_id][1]],[vel_y]])
+                self.tracks[i].pos = self.tracks[i].KF.correct(obs, flag=True)
             else:
                 obs = np.zeros((4,1))
-                self.tracks[i].pos = self.tracks[i].KF.correct(obs, isFirst = True)
+                self.tracks[i].pos = self.tracks[i].KF.correct(obs, flag=False)
 
             if len(self.tracks[i].trace) > self.max_trace_to_store:
                 for j in range(len(self.tracks[i].trace) - self.max_trace_to_store):
@@ -79,6 +89,14 @@ class TrackingList(object):
             self.tracks[i].trace.append(self.tracks[i].pos)
 
         # del tracks exceeding max allowed frames
-        for track_ind in self.tracks:
-            if self.tracks[track_ind].frames_skipped > self.max_frames_can_skip:
-                del self.tracks[track_ind]
+        for i in range(len(self.tracks)):
+            if self.tracks[i].frames_skipped > self.max_frames_can_skip:
+                del self.tracks[i]
+
+        # print("--------------start---------------")
+
+        # for i in range(len(self.tracks)):
+        #     print(self.tracks[i].trace)
+        #     print("")
+
+        # print("--------------end---------------")
