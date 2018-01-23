@@ -4,19 +4,33 @@ class Kalman_Filter(object):
     def __init__(self, dt=0.1):
         self.dt = dt
 
+        # # dynamics
+        # self.F = np.array([[1.0, self.dt], [0.0, 1.0]])
+        # self.x = np.zeros((2, 1))
+        # self.G = np.array([[self.dt**2/2], [self.dt]])
+        # self.P = np.diag((3.0, 3.0))
+        # self.Q = np.eye(self.x.shape[0])
+        #
+        # # observation
+        # self.y = np.array([[0], [255]])
+        # self.H = np.array([[1, 0], [0, 1]])
+        # self.R = np.eye(self.y.shape[0])
+        #
+        # self.prevResult = np.array([[0], [255]])
+
         # dynamics
-        self.F = np.array([[1.0, self.dt], [0.0, 1.0]])
-        self.x = np.zeros((2, 1))
-        self.G = np.array([[self.dt**2/2], [self.dt]])
-        self.P = np.diag((3.0, 3.0))
+        self.F = np.array([[1.0, self.dt, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, self.dt], [0.0, 0.0, 0.0, 1.0]])
+        self.x = np.zeros((4, 1))
+        self.G = np.array([[self.dt ** 2 / 2, 0.0], [self.dt, 0.0], [0.0, self.dt ** 2 / 2], [0.0, self.dt]])
+        self.P = np.diag((3.0, 3.0, 3.0, 3.0))
         self.Q = np.eye(self.x.shape[0])
 
         # observation
-        self.y = np.array([[0], [255]])
-        self.H = np.array([[1, 0], [0, 1]])
+        self.y = np.zeros((4, 1))
+        self.H = np.eye(self.y.shape[0])
         self.R = np.eye(self.y.shape[0])
 
-        self.prevResult = np.array([[0], [255]])
+        self.prevResult = np.zeros((4, 1))
 
     def predict(self, u=0):
         self.x = np.round(np.dot(self.F, self.x) + self.G * u)
