@@ -88,10 +88,7 @@ class TrackingList(object):
 
             self.tracks[i].trace.append(self.tracks[i].pos)
 
-        # del tracks exceeding max allowed frames
-        for i in range(len(self.tracks)):
-            if self.tracks[i].frames_skipped > self.max_frames_can_skip:
-                del self.tracks[i]
+        self.tracks = [x for x in self.tracks if x.frames_skipped <= self.max_frames_can_skip]
 
         # print("--------------start---------------")
 
