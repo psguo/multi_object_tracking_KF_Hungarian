@@ -66,17 +66,17 @@ class TrackingList(object):
             if assigns[i] != -1:
                 detect_id = assigns[i]
                 # print('------------look---------')
-                if len(self.tracks[i].trace) == 0:
-                    vel_x = 0
-                    vel_y = 0
-                else:
+                # if len(self.tracks[i].trace) == 0:
+                #     vel_x = 0
+                #     vel_y = 0
+                # else:
                     # print(detects[detect_id][0])
                     # print(old_pos[0])
                     # print(detects[detect_id][1])
                     # print(old_pos[2])
-                    vel_x = (detects[detect_id][0] - old_pos[0]) / self.dt
-                    vel_y = (detects[detect_id][1] - old_pos[2]) / self.dt
-                obs = np.asarray([[detects[detect_id][0]],[vel_x],[detects[detect_id][1]],[vel_y]])
+                    # vel_x = (detects[detect_id][0] - old_pos[0]) / self.dt
+                    # vel_y = (detects[detect_id][1] - old_pos[2]) / self.dt
+                obs = np.asarray([[detects[detect_id][0]],[0],[detects[detect_id][1]],[0]])
                 self.tracks[i].pos = self.tracks[i].KF.correct(obs, flag=True)
             else:
                 obs = np.zeros((4,1))

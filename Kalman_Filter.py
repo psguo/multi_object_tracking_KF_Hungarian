@@ -24,14 +24,17 @@ class Kalman_Filter(object):
         self.G = np.array([[self.dt ** 2 / 2, 0.0], [self.dt, 0.0], [0.0, self.dt ** 2 / 2], [0.0, self.dt]])
         self.P = np.diag((3.0, 3.0, 3.0, 3.0))
         self.Q = np.eye(self.x.shape[0])
+        self.u = np.zeros((2,1))
 
         # observation
         self.y = np.zeros((4, 1))
         self.H = np.eye(self.y.shape[0])
+        self.H[1][1] = 0
+        self.H[3][3] = 0
         self.R = np.eye(self.y.shape[0])
 
-    def predict(self, u=np.zeros((2,1))):
-        self.x = np.round(np.dot(self.F, self.x) + np.dot(self.G, u))
+    def predict(self):
+        self.x = np.round(np.dot(self.F, self.x) + np.dot(self.G, self.u))
         self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.Q
         return self.x
 
