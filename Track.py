@@ -76,6 +76,7 @@ class TrackingList(object):
                     # print(old_pos[2])
                     # vel_x = (detects[detect_id][0] - old_pos[0]) / self.dt
                     # vel_y = (detects[detect_id][1] - old_pos[2]) / self.dt
+                # print(detects[detect_id])
                 obs = np.asarray([[detects[detect_id][0]],[0],[detects[detect_id][1]],[0]])
                 self.tracks[i].pos = self.tracks[i].KF.correct(obs, flag=True)
             else:
