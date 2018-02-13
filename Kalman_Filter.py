@@ -4,20 +4,6 @@ class Kalman_Filter(object):
     def __init__(self, dt=0.1):
         self.dt = dt
 
-        # # dynamics
-        # self.F = np.array([[1.0, self.dt], [0.0, 1.0]])
-        # self.x = np.zeros((2, 1))
-        # self.G = np.array([[self.dt**2/2], [self.dt]])
-        # self.P = np.diag((3.0, 3.0))
-        # self.Q = np.eye(self.x.shape[0])
-        #
-        # # observation
-        # self.y = np.array([[0], [255]])
-        # self.H = np.array([[1, 0], [0, 1]])
-        # self.R = np.eye(self.y.shape[0])
-        #
-        # self.prevResult = np.array([[0], [255]])
-
         # dynamics
         self.F = np.array([[1.0, self.dt, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, self.dt], [0.0, 0.0, 0.0, 1.0]])
         self.x = np.zeros((4, 1), dtype=float)
@@ -52,3 +38,16 @@ class Kalman_Filter(object):
         self.x = np.round(self.x + np.dot(W, (self.y - np.dot(self.H, self.x))), decimals=2)
         self.P = self.P - np.dot(W, np.dot(S, W.T))
         return self.x
+
+    def calculate_probability(self, new_pos):
+        covariance_matrix = self.P
+        det_cov = np.linalg.det(covariance_matrix)
+
+        norm = new_pos - self.x
+        z = -1/2 * norm.transpose() * np.linalg.inv(covariance_matrix) * norm
+
+        denom = 2 * np.pi * np.sqrt(det_cov)
+
+        p = 1/denom * np.exp(z)
+
+        return p

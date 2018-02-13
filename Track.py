@@ -35,10 +35,13 @@ class TrackingList(object):
         cost_matrix = np.zeros((tracks_no, detects_no))
         for i in range(tracks_no):
             for j in range(detects_no):
-                diff_x = self.tracks[i].pos[0] - detects[j][0]
-                diff_y = self.tracks[i].pos[2] - detects[j][1]
-                cost_matrix[i][j] = np.sqrt(diff_x ** 2 + diff_y ** 2)
-                # print(cost_matrix[i][j])
+                # diff_x = self.tracks[i].pos[0] - detects[j][0]
+                # diff_y = self.tracks[i].pos[2] - detects[j][1]
+                # cost_matrix[i][j] = np.sqrt(diff_x ** 2 + diff_y ** 2)
+                # # print(cost_matrix[i][j])
+
+                # negative for calculate maximum of probability
+                cost_matrix[i][j] = - self.tracks[i].KF.calculate_probability(detects[j])
         row_inds, col_inds = get_optim_assignment(cost_matrix)
         # assign assigned rows
         assigns = [-1 for i in range(tracks_no)]
@@ -61,8 +64,6 @@ class TrackingList(object):
 
         # utilize kalman filter
         for i in range(len(assigns)):
-            old_pos = self.tracks[i].KF.x.copy()
-            pred_pos = self.tracks[i].KF.predict()
             if assigns[i] != -1:
                 detect_id = assigns[i]
                 # print('------------look---------')
@@ -91,6 +92,8 @@ class TrackingList(object):
 
         self.tracks = [x for x in self.tracks if x.frames_skipped <= self.max_frames_can_skip]
 
+        for track in self.tracks:
+            track.pos = track.KF.predict()
         # print("--------------start---------------")
 
         # for i in range(len(self.tracks)):
